@@ -22,13 +22,25 @@ curl -sSL https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rp
 
 ---
 
+### Mise à jour
+
+Pour mettre à jour le binaire avec comparaison de la configuration :
+
+```bash
+wget -qO- https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash -s -- --update
+```
+
+Le script affichera l'ancienne et la nouvelle configuration, et demandera confirmation avant de remplacer.
+
+---
+
 Le script détecte automatiquement l'architecture (ARM64 ou ARMv7), installe git si nécessaire, et configure le service systemd.
 
 ## Fonctionnalités
 
+- **WOL Listener** : Écoute des paquets UDP (Magic Packet) et démarrage automatique des services
+- **Shutdown** : Extinction propre du NAS via cron (arrêt Docker, services, sync)
 - Auto-détection de l'adresse MAC via `/sys/class/net/`
-- Écoute des paquets UDP (Magic Packet)
-- Démarrage automatique des services systemd
 - Configuration TOML externe
 
 ## Prérequis
@@ -70,12 +82,20 @@ port = 9
 services = [
     "docker",
     "nfs-kernel-server",
-    "vsftpd",
-    "minidlna"
+    "vsftpd"
 ]
+
+[shutdown]
+delay_minutes = 5      # Délai avant extinction
+docker_stop = true     # Arrêter les conteneurs Docker
+unexport_nfs = true    # Désactiver les exports NFS
 ```
 
 ## Utilisation
+
+### Mode WOL (par défaut)
+
+Le service systemd écoute en permanence les paquets WOL :
 
 ```bash
 # Statut du service
@@ -87,6 +107,26 @@ sudo journalctl -u wol-nas.service -f
 # Redémarrer après modification de la config
 sudo systemctl restart wol-nas.service
 ```
+
+### Mode Shutdown (extinction programmée)
+
+Lancer manuellement ou via cron :
+
+```bash
+# Extinction manuelle
+sudo /usr/local/bin/wol-nas-listener --shutdown
+
+# Via cron (exemple : tous les jours à 2h du matin)
+# sudo crontab -e
+0 2 * * * /usr/local/bin/wol-nas-listener --shutdown
+```
+
+La séquence d'arrêt :
+1. Programme `shutdown +5` (délai configurable)
+2. Arrête les conteneurs Docker (si activé)
+3. Stoppe les services (docker, nfs, vsftpd...)
+4. Unexport NFS (si activé)
+5. Sync des caches
 
 ## Test & Debug
 
@@ -119,8 +159,11 @@ wakeonlan -i 192.168.1.191 -p 9 DC:A6:32:77:89:63
 ├── Cargo.toml          # Dépendances
 ├── config.toml         # Configuration
 ├── wol-nas.service     # Service systemd
-├── deploy-rpi.sh       # Script de déploiement
-└── install-rpi.sh      # Script d'installation sur RPi
+├── rpi-deploy.sh       # Script d'installation/mise à jour RPi
+├── bin/                # Binaires pré-compilés ARM
+│   ├── wol-nas-listener-arm64
+│   └── wol-nas-listener-armv7
+└── CROSS-COMPILE.md    # Guide de cross-compilation
 ```
 
 ## Licence

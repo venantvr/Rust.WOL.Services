@@ -5,3 +5,8 @@ services = [
     "nfs-kernel-server",
     "vsftpd"
 ]
+
+[shutdown]
+delay_minutes = 5
+docker_stop = true
+unexport_nfs = true
