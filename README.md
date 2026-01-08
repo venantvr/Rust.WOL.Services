@@ -2,6 +2,18 @@
 
 Écouteur Wake-on-LAN en Rust pour Raspberry Pi. Détecte les paquets magiques UDP et démarre automatiquement les services configurés.
 
+## Installation rapide (Raspberry Pi)
+
+```bash
+# Une seule commande pour tout installer :
+curl -sSL https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash
+
+# Ou avec wget :
+wget -qO- https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash
+```
+
+Le script détecte automatiquement l'architecture (ARM64 ou ARMv7), installe git si nécessaire, et configure le service systemd.
+
 ## Fonctionnalités
 
 - Auto-détection de l'adresse MAC via `/sys/class/net/`

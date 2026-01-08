@@ -1,2 +1,5 @@
 /target
 Cargo.lock
+
+# Garder les binaires pré-compilés dans bin/
+!bin/
