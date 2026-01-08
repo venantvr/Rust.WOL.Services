@@ -88,17 +88,29 @@ sudo journalctl -u wol-nas.service -f
 sudo systemctl restart wol-nas.service
 ```
 
-## Test
+## Test & Debug
 
-Depuis un terminal Ubuntu :
+### Sur le Raspberry Pi (voir les logs)
+
+```bash
+# Logs en temps réel (mode tail)
+sudo journalctl -u wol-nas.service -f
+```
+
+### Depuis Ubuntu (envoyer le magic packet)
 
 ```bash
 # Installer wakeonlan
 sudo apt install wakeonlan
 
-# Envoyer un paquet magique
-wakeonlan -i 192.168.1.255 -p 9 XX:XX:XX:XX:XX:XX
+# Envoyer le paquet à l'IP directe du RPi (recommandé)
+wakeonlan -i <IP_RPI> -p 9 <MAC_RPI>
+
+# Exemple :
+wakeonlan -i 192.168.1.191 -p 9 DC:A6:32:77:89:63
 ```
+
+> **Note** : L'envoi en broadcast (`192.168.1.255`) peut être bloqué par certains routeurs. Préférez l'IP directe du RPi.
 
 ## Structure du projet
 
