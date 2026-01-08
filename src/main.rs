@@ -92,9 +92,16 @@ fn run_shutdown(config: &Config) -> std::io::Result<()> {
     // 3. Arrêt des services
     println!("[3/4] Arrêt des services...");
     for service in &config.services {
-        let status = Command::new("systemctl")
-            .args(["stop", service])
-            .status()?;
+        // Support des wildcards (ex: casaos*)
+        let status = if service.contains('*') {
+            Command::new("bash")
+                .args(["-c", &format!("systemctl stop {}", service)])
+                .status()?
+        } else {
+            Command::new("systemctl")
+                .args(["stop", service])
+                .status()?
+        };
         println!("  -> {} : {}", service, if status.success() { "OK" } else { "Erreur" });
     }
 
@@ -138,9 +145,16 @@ fn run_wol_listener(config: &Config) -> std::io::Result<()> {
             if header_ok && mac_ok {
                 println!("Réveil valide ! Relance des services...");
                 for service in &config.services {
-                    let status = Command::new("systemctl")
-                        .args(["start", service])
-                        .status()?;
+                    // Support des wildcards (ex: casaos*)
+                    let status = if service.contains('*') {
+                        Command::new("bash")
+                            .args(["-c", &format!("systemctl start {}", service)])
+                            .status()?
+                    } else {
+                        Command::new("systemctl")
+                            .args(["start", service])
+                            .status()?
+                    };
                     println!("-> {} : {}", service, if status.success() { "OK" } else { "Erreur" });
                 }
             }

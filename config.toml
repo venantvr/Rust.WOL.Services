@@ -1,6 +1,7 @@
 interface = "eth0"
 port = 9
 services = [
+    "casaos*",
     "docker",
     "nfs-kernel-server",
     "vsftpd"
