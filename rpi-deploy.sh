@@ -60,8 +60,8 @@ detect_arch() {
     esac
 }
 
-# Fonction pour comparer les configs
-compare_configs() {
+# Fonction pour afficher et comparer les configs
+show_configs() {
     local old_config="$1"
     local new_config="$2"
 
@@ -72,31 +72,6 @@ compare_configs() {
     echo -e "${CYAN}=== Nouvelle configuration ===${NC}"
     cat "$new_config"
     echo ""
-
-    # Mode forcé : pas de question
-    if [ "$FORCE_CONFIG" = true ]; then
-        return 0
-    fi
-
-    # Vérifier si /dev/tty est accessible (mode interactif)
-    if [ -t 0 ] || [ -e /dev/tty ]; then
-        echo -e "${YELLOW}Voulez-vous remplacer la configuration ? [o/N]${NC}"
-        if read -r response < /dev/tty 2>/dev/null; then
-            case "$response" in
-                [oOyY])
-                    return 0
-                    ;;
-                *)
-                    return 1
-                    ;;
-            esac
-        fi
-    fi
-
-    # Mode non-interactif : conserver la config existante par défaut
-    log_warn "Mode non-interactif détecté, configuration conservée"
-    log_info "Utilisez --force-config pour forcer la mise à jour"
-    return 1
 }
 
 ARCH=$(detect_arch)
@@ -144,13 +119,17 @@ log_info "[4/6] Configuration..."
 mkdir -p "$CONFIG_DIR"
 
 if [ -f "$CONFIG_DIR/config.toml" ]; then
-    # Comparer et demander confirmation
-    if compare_configs "$CONFIG_DIR/config.toml" "$TMP_DIR/config.toml"; then
+    # Afficher les configs pour comparaison
+    show_configs "$CONFIG_DIR/config.toml" "$TMP_DIR/config.toml"
+
+    if [ "$FORCE_CONFIG" = true ]; then
+        # Mode forcé : remplacer sans question
         cp "$CONFIG_DIR/config.toml" "$CONFIG_DIR/config.toml.bak"
         cp "$TMP_DIR/config.toml" "$CONFIG_DIR/"
         log_info "Configuration mise à jour (backup: config.toml.bak)"
     else
-        log_warn "Configuration conservée"
+        # Mode normal : conserver la config existante
+        log_warn "Configuration conservée (utilisez --force-config pour remplacer)"
     fi
 else
     cp "$TMP_DIR/config.toml" "$CONFIG_DIR/"
