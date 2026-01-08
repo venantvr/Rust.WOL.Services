@@ -101,6 +101,12 @@ if [ ! -f "$BINARY" ]; then
     log_error "Binaire non trouvé: $BINARY"
 fi
 
+# Arrêter le service si actif (évite "Text file busy")
+if systemctl is-active --quiet wol-nas.service 2>/dev/null; then
+    log_info "Arrêt du service wol-nas.service..."
+    systemctl stop wol-nas.service
+fi
+
 # Backup si mise à jour
 if [ "$UPDATE_MODE" = true ] && [ -f "$INSTALL_DIR/wol-nas-listener" ]; then
     cp "$INSTALL_DIR/wol-nas-listener" "$INSTALL_DIR/wol-nas-listener.bak"
