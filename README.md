@@ -24,13 +24,21 @@ curl -sSL https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rp
 
 ### Mise à jour
 
-Pour mettre à jour le binaire avec comparaison de la configuration :
+Pour mettre à jour le binaire (conserve la config existante) :
 
 ```bash
 wget -qO- https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash -s -- --update
 ```
 
-Le script affichera l'ancienne et la nouvelle configuration, et demandera confirmation avant de remplacer.
+### Forcer la mise à jour de la configuration
+
+Pour remplacer la configuration par celle du repo (sans confirmation) :
+
+```bash
+wget -qO- https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash -s -- --force-config
+```
+
+> **Note** : Les deux options peuvent être combinées : `--update --force-config`
 
 ---
 

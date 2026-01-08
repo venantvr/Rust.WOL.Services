@@ -1,8 +1,9 @@
 #!/bin/bash
 # Script d'installation/mise à jour WOL NAS Listener pour Raspberry Pi
 # Usage:
-#   Installation : wget -qO- https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash
-#   Mise à jour  : wget -qO- https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash -s -- --update
+#   Installation      : wget -qO- https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash
+#   Mise à jour       : wget -qO- https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash -s -- --update
+#   Forcer la config  : wget -qO- https://raw.githubusercontent.com/venantvr/Rust.WOL.Services/master/rpi-deploy.sh | sudo bash -s -- --force-config
 
 set -e
 
@@ -27,12 +28,21 @@ if [ "$EUID" -ne 0 ]; then
     log_error "Ce script doit être exécuté en root (sudo)"
 fi
 
-# Mode update ?
+# Options
 UPDATE_MODE=false
-if [ "$1" = "--update" ] || [ "$1" = "-u" ]; then
-    UPDATE_MODE=true
-    log_info "Mode mise à jour activé"
-fi
+FORCE_CONFIG=false
+for arg in "$@"; do
+    case "$arg" in
+        --update|-u)
+            UPDATE_MODE=true
+            log_info "Mode mise à jour activé"
+            ;;
+        --force-config|-f)
+            FORCE_CONFIG=true
+            log_info "Mise à jour config forcée"
+            ;;
+    esac
+done
 
 # Détecter l'architecture
 detect_arch() {
@@ -63,6 +73,11 @@ compare_configs() {
     cat "$new_config"
     echo ""
 
+    # Mode forcé : pas de question
+    if [ "$FORCE_CONFIG" = true ]; then
+        return 0
+    fi
+
     # Vérifier si /dev/tty est accessible (mode interactif)
     if [ -t 0 ] || [ -e /dev/tty ]; then
         echo -e "${YELLOW}Voulez-vous remplacer la configuration ? [o/N]${NC}"
@@ -80,7 +95,7 @@ compare_configs() {
 
     # Mode non-interactif : conserver la config existante par défaut
     log_warn "Mode non-interactif détecté, configuration conservée"
-    log_info "Pour forcer la mise à jour de la config, exécutez le script localement"
+    log_info "Utilisez --force-config pour forcer la mise à jour"
     return 1
 }
 
