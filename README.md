@@ -111,23 +111,55 @@ sudo systemctl restart wol-nas.service
 
 ### Mode Shutdown (extinction programmée)
 
-Lancer manuellement ou via cron :
+Lancer manuellement :
 
 ```bash
-# Extinction manuelle
 sudo /usr/local/bin/wol-nas-listener --shutdown
-
-# Via cron (exemple : tous les jours à 2h du matin)
-# sudo crontab -e
-0 2 * * * /usr/local/bin/wol-nas-listener --shutdown
 ```
 
 La séquence d'arrêt :
-1. Programme `shutdown +5` (délai configurable)
-2. Arrête les conteneurs Docker (si activé)
-3. Stoppe les services (docker, nfs, vsftpd...)
-4. Unexport NFS (si activé)
+1. Programme `shutdown +5` (si `poweroff = true`)
+2. Arrête les conteneurs Docker (si `docker_stop = true`)
+3. Stoppe les services (liste `services`)
+4. Unexport NFS (si `unexport_nfs = true`)
 5. Sync des caches
+
+### Configuration Cron (extinction automatique)
+
+Pour programmer une extinction automatique (ex: tous les jours à 2h) :
+
+```bash
+# Éditer le crontab root
+sudo crontab -e
+```
+
+Ajouter la ligne :
+
+```cron
+# Extinction NAS à 2h du matin
+0 2 * * * /usr/local/bin/wol-nas-listener --shutdown >> /var/log/wol-shutdown.log 2>&1
+```
+
+**Format cron** : `minute heure jour mois jour_semaine commande`
+
+| Exemple | Description |
+|---------|-------------|
+| `0 2 * * *` | Tous les jours à 2h00 |
+| `0 23 * * 1-5` | Du lundi au vendredi à 23h00 |
+| `30 1 * * 0` | Dimanche à 1h30 |
+| `0 */6 * * *` | Toutes les 6 heures |
+
+**Vérifier le crontab** :
+
+```bash
+sudo crontab -l
+```
+
+**Consulter les logs** :
+
+```bash
+cat /var/log/wol-shutdown.log
+```
 
 ## Test & Debug
 
