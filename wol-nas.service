@@ -1,14 +1,18 @@
 [Unit]
 Description=Rust WOL Listener pour réveil des services
-After=network-online.target
+# Attend que le réseau soit prêt ET que CasaOS soit démarré
+After=network-online.target casaos.service
 Wants=network-online.target
 
 [Service]
 Type=simple
 User=root
 WorkingDirectory=/etc/wol-rust
+# Attend 30s après le boot avant de commencer à écouter
+ExecStartPre=/bin/sleep 30
 ExecStart=/usr/local/bin/wol-nas-listener
 Restart=always
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target
