@@ -63,17 +63,25 @@ compare_configs() {
     cat "$new_config"
     echo ""
 
-    # Demander confirmation (force lecture depuis terminal, pas stdin)
-    echo -e "${YELLOW}Voulez-vous remplacer la configuration ? [o/N]${NC}"
-    read -r response < /dev/tty
-    case "$response" in
-        [oOyY])
-            return 0
-            ;;
-        *)
-            return 1
-            ;;
-    esac
+    # Vérifier si /dev/tty est accessible (mode interactif)
+    if [ -t 0 ] || [ -e /dev/tty ]; then
+        echo -e "${YELLOW}Voulez-vous remplacer la configuration ? [o/N]${NC}"
+        if read -r response < /dev/tty 2>/dev/null; then
+            case "$response" in
+                [oOyY])
+                    return 0
+                    ;;
+                *)
+                    return 1
+                    ;;
+            esac
+        fi
+    fi
+
+    # Mode non-interactif : conserver la config existante par défaut
+    log_warn "Mode non-interactif détecté, configuration conservée"
+    log_info "Pour forcer la mise à jour de la config, exécutez le script localement"
+    return 1
 }
 
 ARCH=$(detect_arch)
