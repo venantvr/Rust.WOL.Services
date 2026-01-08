@@ -1,11 +1,6 @@
 interface = "eth0"
 port = 9
 services = [
-    "casaos-gateway",
-    "casaos-local-storage",
-    "casaos-message-bus",
-    "casaos-user-service",
-    "casaos",
     "docker",
     "nfs-kernel-server",
     "vsftpd"
