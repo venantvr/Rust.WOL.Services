@@ -7,6 +7,7 @@ services = [
 ]
 
 [shutdown]
-delay_minutes = 5
-docker_stop = true
-unexport_nfs = true
+poweroff = true        # Éteindre la machine (false = arrêter services seulement)
+delay_minutes = 5      # Délai avant extinction (si poweroff = true)
+docker_stop = true     # Arrêter les conteneurs Docker
+unexport_nfs = true    # Désactiver les exports NFS

@@ -15,6 +15,8 @@ struct Config {
 
 #[derive(Deserialize, Default)]
 struct ShutdownConfig {
+    #[serde(default = "default_true")]
+    poweroff: bool,
     #[serde(default = "default_delay")]
     delay_minutes: u32,
     #[serde(default)]
@@ -24,6 +26,7 @@ struct ShutdownConfig {
 }
 
 fn default_delay() -> u32 { 5 }
+fn default_true() -> bool { true }
 
 fn get_mac_address(interface: &str) -> Option<[u8; 6]> {
     let path = format!("/sys/class/net/{}/address", interface);
@@ -43,15 +46,24 @@ fn get_mac_address(interface: &str) -> Option<[u8; 6]> {
 
 fn run_shutdown(config: &Config) -> std::io::Result<()> {
     let delay = config.shutdown.delay_minutes;
+    let poweroff = config.shutdown.poweroff;
 
-    println!("=== Séquence d'arrêt du NAS (délai: {}min) ===", delay);
+    if poweroff {
+        println!("=== Séquence d'arrêt du NAS avec extinction (délai: {}min) ===", delay);
+    } else {
+        println!("=== Arrêt des services NAS (sans extinction) ===");
+    }
 
-    // 1. Programmer l'extinction
-    println!("[1/4] Programmation de l'extinction...");
-    let shutdown_msg = format!("Arrêt du NAS programmé. Fermeture des services en cours...");
-    Command::new("shutdown")
-        .args([&format!("+{}", delay), &shutdown_msg])
-        .status()?;
+    // 1. Programmer l'extinction (seulement si poweroff activé)
+    if poweroff {
+        println!("[1/4] Programmation de l'extinction...");
+        let shutdown_msg = format!("Arrêt du NAS programmé. Fermeture des services en cours...");
+        Command::new("shutdown")
+            .args([&format!("+{}", delay), &shutdown_msg])
+            .status()?;
+    } else {
+        println!("[1/4] Extinction physique désactivée (poweroff = false)");
+    }
 
     // 2. Arrêt des conteneurs Docker
     if config.shutdown.docker_stop {
@@ -97,8 +109,12 @@ fn run_shutdown(config: &Config) -> std::io::Result<()> {
     Command::new("sync").status()?;
 
     println!("");
-    println!("=== Arrêt programmé dans {} minutes ===", delay);
-    println!("La LED verte clignotera 10 fois avant extinction.");
+    if poweroff {
+        println!("=== Arrêt programmé dans {} minutes ===", delay);
+        println!("La LED verte clignotera 10 fois avant extinction.");
+    } else {
+        println!("=== Services arrêtés (machine reste allumée) ===");
+    }
 
     Ok(())
 }
