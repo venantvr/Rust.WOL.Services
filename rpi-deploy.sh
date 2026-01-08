@@ -121,18 +121,13 @@ log_info "[4/6] Configuration..."
 mkdir -p "$CONFIG_DIR"
 
 if [ -f "$CONFIG_DIR/config.toml" ]; then
-    if [ "$UPDATE_MODE" = true ]; then
-        # Mode update : comparer et demander
-        if compare_configs "$CONFIG_DIR/config.toml" "$TMP_DIR/config.toml"; then
-            cp "$CONFIG_DIR/config.toml" "$CONFIG_DIR/config.toml.bak"
-            cp "$TMP_DIR/config.toml" "$CONFIG_DIR/"
-            log_info "Configuration mise à jour (backup: config.toml.bak)"
-        else
-            log_warn "Configuration conservée"
-        fi
+    # Comparer et demander confirmation
+    if compare_configs "$CONFIG_DIR/config.toml" "$TMP_DIR/config.toml"; then
+        cp "$CONFIG_DIR/config.toml" "$CONFIG_DIR/config.toml.bak"
+        cp "$TMP_DIR/config.toml" "$CONFIG_DIR/"
+        log_info "Configuration mise à jour (backup: config.toml.bak)"
     else
-        # Installation normale : conserver l'existante
-        log_warn "Configuration existante conservée: $CONFIG_DIR/config.toml"
+        log_warn "Configuration conservée"
     fi
 else
     cp "$TMP_DIR/config.toml" "$CONFIG_DIR/"
