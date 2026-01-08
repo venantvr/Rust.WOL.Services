@@ -1,0 +1,14 @@
+[Unit]
+Description=Rust WOL Listener pour réveil des services
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/etc/wol-rust
+ExecStart=/usr/local/bin/wol-nas-listener
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

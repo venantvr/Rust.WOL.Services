@@ -1,0 +1,8 @@
+interface = "eth0"
+port = 9
+services = [
+    "docker",
+    "nfs-kernel-server",
+    "vsftpd",
+    "minidlna"
+]
