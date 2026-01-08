@@ -63,9 +63,9 @@ compare_configs() {
     cat "$new_config"
     echo ""
 
-    # Demander confirmation
+    # Demander confirmation (force lecture depuis terminal, pas stdin)
     echo -e "${YELLOW}Voulez-vous remplacer la configuration ? [o/N]${NC}"
-    read -r response
+    read -r response < /dev/tty
     case "$response" in
         [oOyY])
             return 0
