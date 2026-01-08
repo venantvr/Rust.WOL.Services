@@ -89,9 +89,9 @@ fn run_shutdown(config: &Config) -> std::io::Result<()> {
         println!("[2/4] Docker skip (désactivé dans config)");
     }
 
-    // 3. Arrêt des services
+    // 3. Arrêt des services (ordre inverse pour respecter les dépendances)
     println!("[3/4] Arrêt des services...");
-    for service in &config.services {
+    for service in config.services.iter().rev() {
         // Support des wildcards (ex: casaos*) avec --all pour charger toutes les unités
         let status = if service.contains('*') {
             Command::new("systemctl")
