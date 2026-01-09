@@ -60,3 +60,12 @@ jobs:
         with:
           name: wol-nas-listener-armv7
           path: bin/wol-nas-listener-armv7
+
+      - name: Commit binaries to bin/
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bin/
+          git diff --staged --quiet || git commit -m "Update ARM binaries [skip ci]"
+          git push
