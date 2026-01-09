@@ -108,7 +108,7 @@ fn run_shutdown(config: &Config) -> std::io::Result<()> {
     // Unexport NFS si activé
     if config.shutdown.unexport_nfs {
         println!("  -> Unexport NFS...");
-        Command::new("exportfs").arg("-au").status()?;
+        Command::new("/usr/sbin/exportfs").arg("-au").status()?;
     }
 
     // 4. Sync final
