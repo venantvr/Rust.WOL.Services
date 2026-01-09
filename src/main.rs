@@ -90,8 +90,14 @@ fn run_shutdown(config: &Config) -> std::io::Result<()> {
     }
 
     // 3. Arrêt des services (ordre inverse pour respecter les dépendances)
+    // Note: On utilise "mask" puis "stop" pour empêcher le redémarrage automatique
     println!("[3/4] Arrêt des services...");
     for service in config.services.iter().rev() {
+        // Masquer le service pour empêcher le redémarrage auto
+        let _ = Command::new("systemctl")
+            .args(["mask", service])
+            .status();
+
         // Support des wildcards (ex: casaos*) avec --all pour charger toutes les unités
         let status = if service.contains('*') {
             Command::new("systemctl")
@@ -145,6 +151,11 @@ fn run_wol_listener(config: &Config) -> std::io::Result<()> {
             if header_ok && mac_ok {
                 println!("Réveil valide ! Relance des services...");
                 for service in &config.services {
+                    // Démasquer le service (au cas où il a été masqué à l'arrêt)
+                    let _ = Command::new("systemctl")
+                        .args(["unmask", service])
+                        .status();
+
                     // Support des wildcards (ex: casaos*) avec --all pour charger toutes les unités
                     let status = if service.contains('*') {
                         Command::new("systemctl")
